@@ -1,11 +1,9 @@
 import React, { useState } from "react";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog";
+import { addDoc, collection } from "firebase/firestore";
+import {db}from "../../DB/FirebaseConfig";
+
+import {Dialog , DialogContent,DialogHeader,DialogTitle,DialogDescription} from "@/components/ui/dialog";
+
 
 const Addcars = ({ open, setOpen }) => {
     const [formData, setFormData] = useState({
@@ -18,7 +16,7 @@ const Addcars = ({ open, setOpen }) => {
         fuelType: "Petrol",
         availability: "Available",
         price: "",
-        image: null,
+        image: "",
     });
 
     const handleChange = (e) => {
@@ -26,14 +24,12 @@ const Addcars = ({ open, setOpen }) => {
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleFileChange = (e) => {
-        setFormData({ ...formData, image: e.target.files[0] });
-    };
 
-    const handleSubmit = (e) => {
+
+    const handleSubmit = async(e) => {
         e.preventDefault();
         console.log(formData);
-
+        await addDoc(collection(db, "Carsdb"), formData);
         // close popup after submit
         setOpen(false);
     };
@@ -171,11 +167,13 @@ const Addcars = ({ open, setOpen }) => {
                     <div className="col-span-2">
                         <label className="font-semibold">Image</label>
                         <input
-                            type="file"
-                            onChange={handleFileChange}
-                            className="w-full border p-2 rounded-lg"
-                            required
-                        />
+    type="text"
+    name="image"   // ✅ ADD THIS
+    value={formData.image}  // ✅ ADD THIS
+    onChange={handleChange}
+    className="w-full border p-2 rounded-lg"
+    required
+/>
                     </div>
 
                     <div className="col-span-2">
