@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { addDoc, collection } from "firebase/firestore";
-import {db}from "../../DB/FirebaseConfig";
+import { db } from "../../DB/FirebaseConfig";
 
-import {Dialog , DialogContent,DialogHeader,DialogTitle,DialogDescription} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 
 
@@ -27,7 +27,7 @@ const Addcars = ({ open, setOpen }) => {
 
 
 
-    const handleSubmit = async(e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         console.log(formData);
         await addDoc(collection(db, "Carsdb"), formData);
@@ -168,13 +168,13 @@ const Addcars = ({ open, setOpen }) => {
                     <div className="col-span-2">
                         <label className="font-semibold">Image</label>
                         <input
-    type="text"
-    name="image"   // ✅ ADD THIS
-    value={formData.image}  // ✅ ADD THIS
-    onChange={handleChange}
-    className="w-full border p-2 rounded-lg"
-    required
-/>
+                            type="text"
+                            name="image"   // ✅ ADD THIS
+                            value={formData.image}  // ✅ ADD THIS
+                            onChange={handleChange}
+                            className="w-full border p-2 rounded-lg"
+                            required
+                        />
                     </div>
 
                     <div className="col-span-2">
