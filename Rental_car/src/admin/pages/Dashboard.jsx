@@ -1,5 +1,5 @@
 import React from "react";
-import { AdminNavbar } from "../components/AdminNavbar";
+
 import {
   CalendarDays,
   Car,
@@ -128,7 +128,7 @@ export const Dashboard = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen p-3">
-      
+
       <div>
         <h1 className="text-2xl font-bold p-2">Admin Dashboard</h1>
         <p className="font-light ml-1.5">
@@ -196,17 +196,17 @@ export const Dashboard = () => {
         </div>
 
       </div>
-        <div className="flex items-center justify-between gap-2">
-      {/* 🔵 LINE CHART */}
-      <div className="mt-10 p-5 w-170">
-        <ChartLineDots />
-      </div>
+      <div className="flex items-center justify-between gap-2">
+        {/* 🔵 LINE CHART */}
+        <div className="mt-10 p-5 w-170">
+          <ChartLineDots />
+        </div>
 
-     
-      <div className="mt-10 p-5 w-170">
-        <ChartPie />
+
+        <div className="mt-10 p-5 w-170">
+          <ChartPie />
+        </div>
       </div>
-    </div>
     </div>
   );
 };
