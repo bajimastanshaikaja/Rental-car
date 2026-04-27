@@ -37,6 +37,7 @@ export default function App() {
   }, []);
 
   return (
+<<<<<<< HEAD
     <CarContext.Provider value={{ cars, setCars, fetchCars }}>
      
       
@@ -51,5 +52,13 @@ export default function App() {
       
  {/* <ManageCars/> */}
     </CarContext.Provider>
+=======
+    <div>
+
+
+      <ManageCars />
+
+    </div>
+>>>>>>> 3b420ec (fav images')
   );
 }
