@@ -1,6 +1,10 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
+// import CarCard from './CarCard';
+import { CarContext } from '@/App';
 
 function BrowseCars() {
+    const { cars, fetchCars } = useContext(CarContext);
+    console.log(cars);
     const [searchCars, setSearchCars] = useState("");
     return (
         <div className='min-h-screen bg-gray-50 py-8 px-5 '>
@@ -23,6 +27,7 @@ function BrowseCars() {
                     />
                 </div>
             </div>
+            {/* <CarCard /> */}
 
         </div>
     )

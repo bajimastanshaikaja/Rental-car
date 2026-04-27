@@ -2,12 +2,13 @@
 import { Dashboard } from "./admin/pages/Dashboard";
 import Addcars from "./admin/components/Addcars";
 import { ManageCars } from "./admin/pages/ManageCars";
-import BrowseCars from "./users/BrowseCars";
+// import BrowseCars from "./users/BrowseCars";
 import UpdateCar from "./admin/pages/UpdateCar";
 
 import { createContext, useState, useEffect } from "react"; // ✅ include useEffect
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "./DB/FirebaseConfig";
+import CarCard from "./users/CarCard";
 
 // ✅ create context
 export const CarContext = createContext();
@@ -43,8 +44,7 @@ export default function App() {
 
       <div>
 
-
-        <ManageCars />
+        <BrowseCars />
 
       </div>
 
