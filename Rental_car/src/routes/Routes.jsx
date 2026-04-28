@@ -3,9 +3,9 @@ import { createBrowserRouter } from "react-router-dom";
 import Layout from "./Layout";
 
 import { Dashboard } from "@/admin/pages/Dashboard";
-import BrowseCars from "@/users/BrowseCars";
 import Home from "@/admin/pages/Home";
 import { ManageCars } from "@/admin/pages/ManageCars";
+import BrowseCars from "@/users/BrowseCars";
 
 
 export const router = createBrowserRouter([
@@ -31,8 +31,8 @@ export const router = createBrowserRouter([
                 element: <BrowseCars />
             },
             {
-                path :"manageCars",
-                element :<ManageCars />
+                path: "managecars",
+                element: <ManageCars />
             }
 
             // {
