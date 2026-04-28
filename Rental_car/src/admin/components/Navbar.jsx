@@ -28,7 +28,7 @@ function Navbar() {
                         />
 
                         <h1 className="text-2xl font-bold">
-                            Rent <span className="text-orange-500 italic">X</span>
+                            Rent<span className="text-orange-500 italic">X</span>
                         </h1>
                     </div>
 

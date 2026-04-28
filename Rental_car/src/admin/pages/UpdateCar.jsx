@@ -8,11 +8,12 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { CarContext } from "@/App";
+
 import { db } from "@/DB/FirebaseConfig";
+import { CarContext } from "@/main";
 
 const UpdateCar = ({ open, setOpen, car }) => {
-  const { cars,fetchCars } = useContext(CarContext);
+  const {cars,fetchCars } = useContext(CarContext);
   console.log(cars);
 
   const [formData, setFormData] = useState({
