@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 // import CarCard from './CarCard';
-import { CarContext } from '@/App';
+import { CarContext } from '@/main'
 
 function BrowseCars() {
     const { cars, fetchCars } = useContext(CarContext);

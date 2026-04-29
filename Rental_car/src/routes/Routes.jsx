@@ -6,6 +6,7 @@ import { Dashboard } from "@/admin/pages/Dashboard";
 import Home from "@/admin/pages/Home";
 import { ManageCars } from "@/admin/pages/ManageCars";
 import BrowseCars from "@/users/BrowseCars";
+import Mybookings from "@/users/Mybookings";
 
 
 export const router = createBrowserRouter([
@@ -33,12 +34,13 @@ export const router = createBrowserRouter([
             {
                 path: "managecars",
                 element: <ManageCars />
+            },
+            {
+                path: "mybookings",
+                element: <Mybookings />
             }
 
-            // {
-            //     path: "mybookings",
-            //     element: <MyBookings />
-            // }
+
 
         ]
 
