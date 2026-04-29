@@ -7,6 +7,7 @@ import Home from "@/admin/pages/Home";
 import { ManageCars } from "@/admin/pages/ManageCars";
 import BrowseCars from "@/users/BrowseCars";
 import Mybookings from "@/users/Mybookings";
+import UserDashboard from "@/users/UserDashboard";
 
 
 export const router = createBrowserRouter([
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
             {
                 path: "mybookings",
                 element: <Mybookings />
+            },
+            {
+                path: "userDashboard",
+                element: <UserDashboard />
             }
 
 
