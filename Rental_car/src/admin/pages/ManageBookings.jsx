@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { collection, getDocs, doc, updateDoc, orderBy, query, getDoc } from 'firebase/firestore'
+import { collection, getDocs, doc, updateDoc, orderBy, query } from 'firebase/firestore'
 import { db } from '@/DB/FirebaseConfig'
-import { Eye, XCircle, IndianRupee, Star } from 'lucide-react'
+import { Eye, CheckCircle, XCircle, IndianRupee } from 'lucide-react'
 import { toast } from 'sonner'
 import {
     Dialog, DialogContent, DialogHeader,
@@ -47,50 +47,15 @@ function formatDateFull(dateStr) {
     })
 }
 
-// ── Interactive star picker ───────────────────────────────
-function StarPicker({ value, onChange }) {
-    const [hovered, setHovered] = useState(0)
-    return (
-        <div className="flex gap-1">
-            {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                    key={star}
-                    type="button"
-                    onClick={() => onChange(star)}
-                    onMouseEnter={() => setHovered(star)}
-                    onMouseLeave={() => setHovered(0)}
-                    className="transition-transform hover:scale-110"
-                >
-                    <Star
-                        size={32}
-                        className={
-                            star <= (hovered || value)
-                                ? 'text-yellow-400 fill-yellow-400'
-                                : 'text-gray-300 fill-gray-200'
-                        }
-                    />
-                </button>
-            ))}
-        </div>
-    )
-}
-
 const TABS = ['all', 'pending', 'confirmed', 'completed', 'cancelled']
 
-function Mybookings() {
+export default function ManageBookings() {
     const [bookings, setBookings] = useState([])
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('all')
-
-    // Detail modal
     const [selectedBooking, setSelectedBooking] = useState(null)
     const [detailOpen, setDetailOpen] = useState(false)
-
-    // Rating modal
-    const [ratingBooking, setRatingBooking] = useState(null)
-    const [ratingOpen, setRatingOpen] = useState(false)
-    const [selectedRating, setSelectedRating] = useState(0)
-    const [ratingLoading, setRatingLoading] = useState(false)
+    const [search, setSearch] = useState('')
 
     const fetchBookings = async () => {
         setLoading(true)
@@ -112,69 +77,37 @@ function Mybookings() {
         try {
             await updateDoc(doc(db, 'Bookings', id), { status: newStatus })
             setBookings((prev) => prev.map((b) => b.id === id ? { ...b, status: newStatus } : b))
-            toast.success(`Booking ${newStatus}`)
+            toast.success(`Booking marked as ${newStatus}`)
         } catch (err) {
             console.error(err)
-            toast.error('Failed to update booking')
+            toast.error('Failed to update status')
         }
     }
 
-    // Submit rating — updates Booking doc + recalculates car's average rating
-    const submitRating = async () => {
-        if (!selectedRating) { toast.error('Please select a rating'); return }
-        setRatingLoading(true)
-        try {
-            // 1. Save rating on the booking
-            await updateDoc(doc(db, 'Bookings', ratingBooking.id), {
-                rating: selectedRating,
-                ratedAt: new Date().toISOString(),
-            })
-
-            // 2. Recalculate average rating on the car
-            const carId = ratingBooking.carId
-            if (carId) {
-                // Get all completed + rated bookings for this car
-                const allSnap = await getDocs(collection(db, 'Bookings'))
-                const carBookings = allSnap.docs
-                    .map(d => d.data())
-                    .filter(b => b.carId === carId && b.rating)
-
-                // Include the new rating we just saved
-                const ratings = carBookings.map(b => b.rating)
-                if (!ratings.includes(selectedRating)) ratings.push(selectedRating)
-
-                const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length
-
-                await updateDoc(doc(db, 'Carsdb', carId), {
-                    rating: parseFloat(avg.toFixed(1)),
-                })
-            }
-
-            // 3. Update local state
-            setBookings(prev => prev.map(b =>
-                b.id === ratingBooking.id ? { ...b, rating: selectedRating } : b
-            ))
-
-            toast.success('Rating submitted!')
-            setRatingOpen(false)
-            setSelectedRating(0)
-        } catch (err) {
-            console.error(err)
-            toast.error('Failed to submit rating')
-        } finally {
-            setRatingLoading(false)
-        }
-    }
-
-    const filtered = activeTab === 'all'
-        ? bookings
-        : bookings.filter((b) => b.status === activeTab)
+    const filtered = bookings
+        .filter((b) => activeTab === 'all' || b.status === activeTab)
+        .filter((b) =>
+            !search ||
+            b.customerName?.toLowerCase().includes(search.toLowerCase()) ||
+            b.carName?.toLowerCase().includes(search.toLowerCase()) ||
+            b.bookingId?.toLowerCase().includes(search.toLowerCase())
+        )
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-5">
             {/* Header */}
-            <h1 className="text-2xl font-bold text-gray-800">My Bookings</h1>
-            <p className="text-gray-500 mt-1">Manage and track all your car rentals</p>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800">Manage Bookings</h1>
+                    <p className="text-gray-500 mt-1">View and manage all customer bookings</p>
+                </div>
+                <input
+                    placeholder="Search by customer, car or booking ID..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="border border-gray-300 rounded-full px-4 py-2 text-sm bg-white w-72 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                />
+            </div>
 
             {/* Tabs */}
             <div className="flex gap-2 mt-6 flex-wrap">
@@ -213,8 +146,8 @@ function Mybookings() {
                                 <th className="px-5 py-4">Booking ID</th>
                                 <th className="px-5 py-4">Customer</th>
                                 <th className="px-5 py-4">Car</th>
-                                <th className="px-5 py-4">Pickup Date</th>
-                                <th className="px-5 py-4">Return Date</th>
+                                <th className="px-5 py-4">Pickup</th>
+                                <th className="px-5 py-4">Return</th>
                                 <th className="px-5 py-4">Amount</th>
                                 <th className="px-5 py-4">Status</th>
                                 <th className="px-5 py-4 text-center">Actions</th>
@@ -259,7 +192,6 @@ function Mybookings() {
 
                                     <td className="px-5 py-4">
                                         <div className="flex items-center justify-center gap-3">
-                                            {/* View */}
                                             <button
                                                 title="View Details"
                                                 onClick={() => { setSelectedBooking(booking); setDetailOpen(true) }}
@@ -267,31 +199,24 @@ function Mybookings() {
                                             >
                                                 <Eye size={18} />
                                             </button>
-
-                                            {/* Rate — only completed, not yet rated */}
-                                            {booking.status === 'completed' && !booking.rating && (
+                                            {booking.status === 'pending' && (
                                                 <button
-                                                    title="Rate this car"
-                                                    onClick={() => {
-                                                        setRatingBooking(booking)
-                                                        setSelectedRating(0)
-                                                        setRatingOpen(true)
-                                                    }}
-                                                    className="text-gray-400 hover:text-yellow-500 transition-colors"
+                                                    title="Confirm"
+                                                    onClick={() => updateStatus(booking.id, 'confirmed')}
+                                                    className="text-gray-400 hover:text-green-600 transition-colors"
                                                 >
-                                                    <Star size={18} />
+                                                    <CheckCircle size={18} />
                                                 </button>
                                             )}
-
-                                            {/* Show submitted rating */}
-                                            {booking.status === 'completed' && booking.rating && (
-                                                <div className="flex items-center gap-0.5 text-yellow-400">
-                                                    <Star size={14} className="fill-yellow-400" />
-                                                    <span className="text-xs font-semibold text-gray-600">{booking.rating}</span>
-                                                </div>
+                                            {booking.status === 'confirmed' && (
+                                                <button
+                                                    title="Mark Completed"
+                                                    onClick={() => updateStatus(booking.id, 'completed')}
+                                                    className="text-gray-400 hover:text-green-600 transition-colors"
+                                                >
+                                                    <CheckCircle size={18} />
+                                                </button>
                                             )}
-
-                                            {/* Cancel */}
                                             {(booking.status === 'pending' || booking.status === 'confirmed') && (
                                                 <button
                                                     title="Cancel"
@@ -318,7 +243,7 @@ function Mybookings() {
                 </p>
             )}
 
-            {/* ── Detail Modal ─────────────────────────────── */}
+            {/* Detail Modal */}
             <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
                 <DialogContent className="max-w-md bg-white rounded-2xl shadow-2xl">
                     <DialogHeader>
@@ -352,68 +277,7 @@ function Mybookings() {
                                         {selectedBooking.amount}
                                     </div>
                                 </Detail>
-                                {selectedBooking.rating && (
-                                    <Detail label="Your Rating">
-                                        <div className="flex items-center gap-1">
-                                            {[1,2,3,4,5].map(s => (
-                                                <Star key={s} size={14}
-                                                    className={s <= selectedBooking.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'}
-                                                />
-                                            ))}
-                                        </div>
-                                    </Detail>
-                                )}
                             </div>
-                        </div>
-                    )}
-                </DialogContent>
-            </Dialog>
-
-            {/* ── Rating Modal ─────────────────────────────── */}
-            <Dialog open={ratingOpen} onOpenChange={setRatingOpen}>
-                <DialogContent className="max-w-sm bg-white rounded-2xl shadow-2xl">
-                    <DialogHeader>
-                        <DialogTitle className="text-lg font-bold">Rate Your Experience</DialogTitle>
-                        <DialogDescription className="text-gray-400 text-sm">
-                            How was your ride in {ratingBooking?.carName}?
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    {ratingBooking && (
-                        <div className="flex flex-col items-center gap-5 mt-2">
-                            {/* Car summary */}
-                            <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 w-full">
-                                <img
-                                    src={ratingBooking.carImage}
-                                    alt={ratingBooking.carName}
-                                    className="w-16 h-11 object-cover rounded-lg"
-                                    onError={(e) => { e.target.src = 'https://placehold.co/64x44?text=Car' }}
-                                />
-                                <div>
-                                    <p className="font-bold text-gray-800 text-sm">{ratingBooking.carName}</p>
-                                    <p className="text-xs text-gray-400">{ratingBooking.carBrand} &bull; {ratingBooking.carType}</p>
-                                </div>
-                            </div>
-
-                            {/* Star picker */}
-                            <StarPicker value={selectedRating} onChange={setSelectedRating} />
-
-                            {/* Label */}
-                            <p className="text-sm text-gray-500 h-5">
-                                {selectedRating === 1 && 'Poor'}
-                                {selectedRating === 2 && 'Fair'}
-                                {selectedRating === 3 && 'Good'}
-                                {selectedRating === 4 && 'Very Good'}
-                                {selectedRating === 5 && 'Excellent!'}
-                            </p>
-
-                            <button
-                                onClick={submitRating}
-                                disabled={!selectedRating || ratingLoading}
-                                className="w-full bg-blue-600 text-white py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
-                            >
-                                {ratingLoading ? 'Submitting...' : 'Submit Rating'}
-                            </button>
                         </div>
                     )}
                 </DialogContent>
@@ -421,5 +285,3 @@ function Mybookings() {
         </div>
     )
 }
-
-export default Mybookings
