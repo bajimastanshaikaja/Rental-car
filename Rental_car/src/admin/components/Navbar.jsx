@@ -16,7 +16,7 @@ function Navbar() {
     const [authMode, setAuthMode] = useState("login");
 
     const handleLogout = async () => {
-        await logout();              // clears localStorage + Firebase Auth + React state
+        await logout();             
         toast.success("Logged out");
         navigate("/");
     };

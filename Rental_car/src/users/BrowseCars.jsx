@@ -46,7 +46,7 @@ function BrowseCars() {
                     placeholder='Search by name or brand...'
                     value={searchCars}
                     onChange={(e) => setSearchCars(e.target.value)}
-                    className='rounded-full border border-gray-300 px-4 py-2 bg-white w-72 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300'
+                    className='rounded-full border border-gray-300 px-4 py-2 bg-white w-full sm:w-72 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300'
                 />
 
                 <button

@@ -339,7 +339,7 @@ function Mybookings() {
                                     <p className="text-sm text-gray-500">{selectedBooking.carBrand} &bull; {selectedBooking.carType}</p>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                                 <Detail label="Customer" value={selectedBooking.customerName} />
                                 <Detail label="Email" value={selectedBooking.customerEmail} />
                                 <Detail label="Phone" value={selectedBooking.customerPhone} />

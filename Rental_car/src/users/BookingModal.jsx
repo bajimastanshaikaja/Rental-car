@@ -107,7 +107,7 @@ function BookingModal({ open, setOpen, car }) {
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-3 mt-2">
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-semibold text-gray-700">Full Name</label>
                             <input
@@ -145,7 +145,7 @@ function BookingModal({ open, setOpen, car }) {
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-semibold text-gray-700">Pickup Date & Time</label>
                             <input
