@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Menu, X, LogOut, User } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "@/main";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Register from "../pages/Register";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 function Navbar() {
     const { currentUser, role, logout } = useContext(AuthContext);
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [open, setOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -30,7 +31,7 @@ function Navbar() {
 
     // Links shown only when logged in as user
     const userLinks = [
-        { to: "/userDashboard", label: "User Dashboard" },
+        { to: "/userDashboard", label: "Dashboard" },
         { to: "/browsecars",    label: "Browse Cars" },
         { to: "/mybookings",    label: "My Bookings" },
     ];
@@ -62,16 +63,23 @@ function Navbar() {
                     {/* Desktop nav */}
                     <div className="hidden md:flex items-center gap-8">
                         <ul className="flex gap-6">
-                            {navLinks.map((link) => (
-                                <li key={link.to}>
-                                    <Link
-                                        to={link.to}
-                                        className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
-                                    >
-                                        {link.label}
-                                    </Link>
-                                </li>
-                            ))}
+                            {navLinks.map((link) => {
+                                const isActive = location.pathname === link.to
+                                return (
+                                    <li key={link.to}>
+                                        <Link
+                                            to={link.to}
+                                            className={`font-medium transition-colors pb-1 border-b-2 ${
+                                                isActive
+                                                    ? 'text-blue-600 border-blue-600'
+                                                    : 'text-gray-700 border-transparent hover:text-blue-600'
+                                            }`}
+                                        >
+                                            {link.label}
+                                        </Link>
+                                    </li>
+                                )
+                            })}
                         </ul>
 
                         {currentUser ? (
@@ -119,17 +127,22 @@ function Navbar() {
                 {menuOpen && (
                     <div className="md:hidden mt-4 bg-white rounded-lg p-5 shadow-md">
                         <ul className="flex flex-col gap-4 mb-4">
-                            {navLinks.map((link) => (
-                                <li key={link.to}>
-                                    <Link
-                                        to={link.to}
-                                        onClick={() => setMenuOpen(false)}
-                                        className="text-gray-700 font-medium"
-                                    >
-                                        {link.label}
-                                    </Link>
-                                </li>
-                            ))}
+                            {navLinks.map((link) => {
+                                const isActive = location.pathname === link.to
+                                return (
+                                    <li key={link.to}>
+                                        <Link
+                                            to={link.to}
+                                            onClick={() => setMenuOpen(false)}
+                                            className={`font-medium transition-colors ${
+                                                isActive ? 'text-blue-600' : 'text-gray-700'
+                                            }`}
+                                        >
+                                            {link.label}
+                                        </Link>
+                                    </li>
+                                )
+                            })}
                         </ul>
 
                         {currentUser ? (
