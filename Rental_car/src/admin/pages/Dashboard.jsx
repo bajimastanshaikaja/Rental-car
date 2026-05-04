@@ -21,11 +21,11 @@ const [bookings, setBookings] = useState([]);
   const chartConfig = { desktop: { label: "Desktop", color: "var(--chart-1)" } };
 
   const pieData = [
-    { browser: "Chrome",  visitors: 275, fill: "#3b82f6" },
-    { browser: "Safari",  visitors: 200, fill: "#22c55e" },
-    { browser: "Firefox", visitors: 187, fill: "#f97316" },
-    { browser: "Edge",    visitors: 173, fill: "#06b6d4" },
-    { browser: "Other",   visitors: 90,  fill: "#a855f7" },
+    { browser: "SUV",  visitors: 275, fill: "#3b82f6" },
+    { browser: "Compact",  visitors: 200, fill: "#22c55e" },
+    { browser: "Sedan", visitors: 187, fill: "#f97316" },
+    { browser: "EV",    visitors: 173, fill: "#06b6d4" },
+    { browser: "Sports",   visitors: 90,  fill: "#a855f7" },
   ];
   {/* ✅ CALCULATIONS (add just above return OR before JSX) */}
 const totalFleet = bookings.length;
@@ -59,11 +59,11 @@ const available = totalFleet - rentedOut;
   fetchBookings();
 }, []);
   const COLORS = [
-  "#5B3E35",
-  "#465048",
-  "#BD916F",
-  "#C0B283",
-  "#A4AC86",
+  "#C87740",
+  "#00A19B",
+  "#8B004A",
+  "#6BBF59",
+  "#58C5FE",
 ];
 
   const ChartLineDots = () => (
@@ -94,7 +94,7 @@ const available = totalFleet - rentedOut;
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Visitors Distribution</CardTitle>
+        <CardTitle>Bookings by Car Type</CardTitle>
         <CardDescription>Last 6 months</CardDescription>
       </CardHeader>
 
@@ -217,11 +217,11 @@ const available = totalFleet - rentedOut;
 
     </table>
   </div>
-  <div className="bg-white ml-15 mt-4 w-90 h-90 rounded-xl shadow-sm p-4">
+  <div className="bg-white ml-15 mt-4 w-80 h-90 rounded-xl shadow-sm p-4">
   <h1 className="font-bold text-lg mb-4">Fleet Status</h1>
 
   {/* Available */}
-  <div className="flex items-center justify-between bg-green-100 p-3 rounded-xl mb-3">
+  <div className="flex items-center justify-between bg-green-100 p-3 rounded-xl mb-3 mt-4">
     <div>
       <p className="text-gray-600 text-sm">Available</p>
       <h2 className="text-xl font-bold text-green-600">{available}</h2>

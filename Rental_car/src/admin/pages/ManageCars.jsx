@@ -104,7 +104,7 @@ export const ManageCars = () => {
           Filters
         </button>
 
-        {(searchQuery || maxPrice || minRating) && (
+        {(searchQuery || maxPrice || minRating>0) && (
           <button
             onClick={clearFilters}
             className="text-red-500 text-sm"
@@ -141,7 +141,7 @@ export const ManageCars = () => {
             </label>
 
             <div className="flex gap-2 mt-2">
-              {[0,1,2,3,4,5].map((star) => (
+              {[1,2,3,4,5].map((star) => (
                 <button
                   key={star}
                   onClick={() => setMinRating(star)}
@@ -151,7 +151,7 @@ export const ManageCars = () => {
                       : "bg-white"
                   }`}
                 >
-                  {star === 0 ? "All" : `${star}★`}
+                  {`${star}★`}
                 </button>
               ))}
             </div>
