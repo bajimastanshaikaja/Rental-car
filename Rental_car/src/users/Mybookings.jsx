@@ -302,6 +302,7 @@ export default function Mybookings() {
         }
     }
 
+    // Submit rating — updates Booking doc + recalculates car's average rating
     const submitRating = async () => {
         if (!selectedRating) { toast.error('Please select a rating'); return }
         setRatingLoading(true)
@@ -310,6 +311,7 @@ export default function Mybookings() {
                 rating: selectedRating,
                 ratedAt: new Date().toISOString(),
             })
+            // 2. Recalculate average rating on the car
             const carId = ratingBooking.carId
             if (carId) {
                 const allSnap = await getDocs(collection(db, 'Bookings'))

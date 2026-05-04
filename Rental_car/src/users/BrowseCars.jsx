@@ -1,10 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { CarContext } from '@/main'
-import CarCard from './CarCard'
-import { collection, getDocs } from 'firebase/firestore'
-import { db } from '@/DB/FirebaseConfig'
-import { SlidersHorizontal, X } from 'lucide-react'
-
+import { CarContext } from '@/main';
+import React, { useContext, useState } from 'react'
+import CarCard from './CarCard';
+import { SlidersHorizontal,X } from "lucide-react";
 function BrowseCars() {
     const { cars } = useContext(CarContext)
     const [searchCars, setSearchCars] = useState('')
