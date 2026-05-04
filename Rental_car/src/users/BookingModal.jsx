@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import React, { useState, useContext } from 'react'
+import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/DB/FirebaseConfig'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { IndianRupee } from 'lucide-react'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
+import { AuthContext } from '@/main'
 
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID
 
@@ -28,6 +29,7 @@ loadRazorpayScript()
 
 function BookingModal({ open, setOpen, car }) {
     const navigate = useNavigate()
+    const { currentUser } = useContext(AuthContext)
     const [form, setForm] = useState({
         customerName: '',
         customerEmail: '',
@@ -67,6 +69,7 @@ function BookingModal({ open, setOpen, car }) {
         const bookingId = generateBookingId()
         await addDoc(collection(db, 'Bookings'), {
             bookingId,
+            userId: currentUser?.uid || null,   // ← logged-in user's UID
             customerName: form.customerName,
             customerEmail: form.customerEmail,
             customerPhone: form.customerPhone,
@@ -82,6 +85,7 @@ function BookingModal({ open, setOpen, car }) {
             status: 'confirmed',
             createdAt: serverTimestamp(),
         })
+        await updateDoc(doc(db, 'Carsdb', car.id), { availability: 'Not Available' })
         return bookingId
     }
 

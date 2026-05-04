@@ -1,13 +1,12 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, useRef } from 'react'
 import { collection, query, where, onSnapshot, doc, updateDoc, getDocs } from 'firebase/firestore'
 import { db } from '@/DB/FirebaseConfig'
 import { IndianRupee, Star, XCircle, CalendarDays, ChevronDown, ChevronUp, Car } from 'lucide-react'
 import { toast } from 'sonner'
 import { AuthContext } from '@/main'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 
-// ── Helpers ───────────────────────────────────────────────
 const STATUS_STYLES = {
     pending:   'bg-yellow-100 text-yellow-700',
     confirmed: 'bg-blue-100 text-blue-700',
@@ -53,13 +52,14 @@ function formatDate(dateStr) {
 }
 
 // ── Single Booking Row Card ───────────────────────────────
-function BookingCard({ booking, onCancel, onRate }) {
+function BookingCard({ booking, onCancel, onRate, highlighted, cardRef }) {
     const [expanded, setExpanded] = useState(false)
     const isActive    = booking.status === 'pending' || booking.status === 'confirmed'
     const isCompleted = booking.status === 'completed'
 
     return (
-        <div className={`bg-white rounded-2xl shadow-sm border overflow-hidden ${
+        <div ref={cardRef} className={`bg-white rounded-2xl shadow-sm border overflow-hidden transition-all ${
+            highlighted ? 'border-blue-400 ring-2 ring-blue-300' :
             booking.status === 'confirmed' ? 'border-blue-300' : 'border-gray-100'
         }`}>
             {/* Confirmed banner */}
@@ -217,41 +217,84 @@ function TabBtn({ label, count, active, color, onClick }) {
 // ── Main ──────────────────────────────────────────────────
 export default function Mybookings() {
     const { currentUser } = useContext(AuthContext)
+    const location = useLocation()
+    const highlightRef = useRef(null)
     const [bookings, setBookings]     = useState([])
     const [loading, setLoading]       = useState(true)
     const [activeTab, setActiveTab]   = useState('active')
+    const [highlightId, setHighlightId] = useState(null)
     const [ratingBooking, setRatingBooking]   = useState(null)
     const [ratingOpen, setRatingOpen] = useState(false)
     const [selectedRating, setSelectedRating] = useState(0)
     const [ratingLoading, setRatingLoading]   = useState(false)
 
+    // Read navigation state — switch to completed tab and highlight booking
     useEffect(() => {
-        if (!currentUser?.email) return
+        if (location.state?.tab === 'completed') {
+            setActiveTab('completed')
+            if (location.state?.bookingId) {
+                setHighlightId(location.state.bookingId)
+            }
+        }
+    }, [location.state])
+
+    // Scroll to highlighted booking after render
+    useEffect(() => {
+        if (highlightId && highlightRef.current) {
+            setTimeout(() => {
+                highlightRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }, 300)
+        }
+    }, [highlightId, bookings])
+
+    useEffect(() => {
+        if (!currentUser?.uid && !currentUser?.email) return
         setLoading(true)
 
-        const q = query(
-            collection(db, 'Bookings'),
-            where('customerEmail', '==', currentUser.email)
-        )
+        const uid = currentUser?.uid
+        const email = currentUser?.email
 
-        const unsub = onSnapshot(q, (snap) => {
-            const data = snap.docs
-                .map(d => ({ id: d.id, ...d.data() }))
-                .sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0))
-            setBookings(data)
-            setLoading(false)
-        }, (err) => {
-            console.error(err)
-            toast.error('Failed to load bookings')
-            setLoading(false)
-        })
+        // Run both queries in parallel — by userId (new bookings) and by email (old bookings)
+        const qByUid   = uid   ? query(collection(db, 'Bookings'), where('userId', '==', uid))   : null
+        const qByEmail = email ? query(collection(db, 'Bookings'), where('customerEmail', '==', email)) : null
 
-        return () => unsub()
+        const merge = (snapA, snapB) => {
+            const map = new Map()
+            ;[...(snapA?.docs ?? []), ...(snapB?.docs ?? [])].forEach(d => map.set(d.id, { id: d.id, ...d.data() }))
+            return [...map.values()].sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0))
+        }
+
+        let snapUid   = null
+        let snapEmail = null
+        const unsubs  = []
+
+        if (qByUid) {
+            unsubs.push(onSnapshot(qByUid, (snap) => {
+                snapUid = snap
+                setBookings(merge(snapUid, snapEmail))
+                setLoading(false)
+            }, (err) => { console.error(err); setLoading(false) }))
+        }
+
+        if (qByEmail) {
+            unsubs.push(onSnapshot(qByEmail, (snap) => {
+                snapEmail = snap
+                setBookings(merge(snapUid, snapEmail))
+                setLoading(false)
+            }, (err) => { console.error(err); setLoading(false) }))
+        }
+
+        return () => unsubs.forEach(u => u())
     }, [currentUser])
 
     const handleCancel = async (id) => {
         try {
             await updateDoc(doc(db, 'Bookings', id), { status: 'cancelled' })
+            // Restore car availability
+            const booking = bookings.find(b => b.id === id)
+            if (booking?.carId) {
+                await updateDoc(doc(db, 'Carsdb', booking.carId), { availability: 'Available' })
+            }
             toast.success('Booking cancelled')
         } catch (err) {
             console.error(err)
@@ -338,6 +381,8 @@ export default function Mybookings() {
                         <BookingCard
                             key={booking.id}
                             booking={booking}
+                            highlighted={booking.id === highlightId}
+                            cardRef={booking.id === highlightId ? highlightRef : null}
                             onCancel={handleCancel}
                             onRate={(b) => { setRatingBooking(b); setSelectedRating(0); setRatingOpen(true) }}
                         />
@@ -375,7 +420,9 @@ export default function Mybookings() {
                             >
                                 {ratingLoading ? 'Submitting...' : 'Submit Rating'}
                             </button>
+                            <p></p>
                         </div>
+                        
                     )}
                 </DialogContent>
             </Dialog>
