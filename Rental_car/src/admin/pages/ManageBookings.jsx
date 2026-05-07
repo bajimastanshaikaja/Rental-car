@@ -73,16 +73,56 @@ export default function ManageBookings() {
 
     useEffect(() => { fetchBookings() }, [])
 
-    const updateStatus = async (id, newStatus) => {
-        try {
-            await updateDoc(doc(db, 'Bookings', id), { status: newStatus })
-            setBookings((prev) => prev.map((b) => b.id === id ? { ...b, status: newStatus } : b))
-            toast.success(`Booking marked as ${newStatus}`)
-        } catch (err) {
-            console.error(err)
-            toast.error('Failed to update status')
+   const updateStatus = async (id, newStatus, booking) => {
+    try {
+
+        // ✅ Update Firestore
+        await updateDoc(doc(db, "Bookings", id), {
+            status: newStatus,
+        });
+
+        // ✅ Update UI instantly
+        setBookings((prev) =>
+            prev.map((b) =>
+                b.id === id
+                    ? { ...b, status: newStatus }
+                    : b
+            )
+        );
+
+        toast.success(`Booking marked as ${newStatus}`);
+
+        // ✅ SEND EMAIL WHEN COMPLETED
+        if (newStatus === "completed") {
+
+            const response = await fetch("/api/send-email", {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                },
+
+                body: JSON.stringify({
+                    email: booking.customerEmail,
+                    customerName: booking.customerName,
+                    bookingId: booking.bookingId,
+                    carName: booking.carName,
+                    amount: booking.amount,
+                }),
+            });
+
+            const data = await response.json();
+
+            console.log(data);
+
+            toast.success("Email Sent Successfully ✅");
         }
+
+    } catch (err) {
+        console.error(err);
+        toast.error("Something went wrong");
     }
+};
 
     const filtered = bookings
         .filter((b) => activeTab === 'all' || b.status === activeTab)
