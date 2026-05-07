@@ -76,10 +76,20 @@ export default function ManageBookings() {
    const updateStatus = async (id, newStatus, booking) => {
     try {
 
-        // ✅ Update Firestore
+        // ✅ Update booking status
         await updateDoc(doc(db, "Bookings", id), {
             status: newStatus,
         });
+
+        // ✅ Update car availability
+        if (
+            booking?.carId &&
+            (newStatus === "completed" || newStatus === "cancelled")
+        ) {
+            await updateDoc(doc(db, "Carsdb", booking.carId), {
+                availability: "Available",
+            });
+        }
 
         // ✅ Update UI instantly
         setBookings((prev) =>
@@ -120,7 +130,7 @@ export default function ManageBookings() {
 
     } catch (err) {
         console.error(err);
-        toast.error("Something went wrong");
+        toast.error("Failed to update status");
     }
 };
 
@@ -229,10 +239,10 @@ export default function ManageBookings() {
                                     <td className="px-5 py-4 flex justify-center gap-3">
                                         <Eye size={18} className="cursor-pointer text-gray-500 hover:text-blue-600" />
                                         {booking.status === 'confirmed' && (
-                                            <CheckCircle size={18} onClick={() => updateStatus(booking.id, 'completed')} className="cursor-pointer text-gray-400 hover:text-green-600" />
+                                            <CheckCircle size={18} onClick={() => updateStatus(booking.id, 'completed',booking)} className="cursor-pointer text-gray-400 hover:text-green-600" />
                                         )}
                                         {(booking.status === 'confirmed') && (
-                                            <XCircle size={18} onClick={() => updateStatus(booking.id, 'cancelled')} className="cursor-pointer text-gray-400 hover:text-red-500" />
+                                            <XCircle size={18} onClick={() => updateStatus(booking.id, 'cancelled',booking)} className="cursor-pointer text-gray-400 hover:text-red-500" />
                                         )}
                                     </td>
                                 </tr>
