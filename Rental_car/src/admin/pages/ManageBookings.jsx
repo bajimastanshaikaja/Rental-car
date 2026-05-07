@@ -73,22 +73,66 @@ export default function ManageBookings() {
 
     useEffect(() => { fetchBookings() }, [])
 
-    const updateStatus = async (id, newStatus) => {
-        try {
-            await updateDoc(doc(db, 'Bookings', id), { status: newStatus })
+   const updateStatus = async (id, newStatus, booking) => {
+    try {
 
-            const booking = bookings.find(b => b.id === id)
-            if (booking?.carId && (newStatus === 'completed' || newStatus === 'cancelled')) {
-                await updateDoc(doc(db, 'Carsdb', booking.carId), { availability: 'Available' })
-            }
+        // ✅ Update booking status
+        await updateDoc(doc(db, "Bookings", id), {
+            status: newStatus,
+        });
 
-            setBookings((prev) => prev.map((b) => b.id === id ? { ...b, status: newStatus } : b))
-            toast.success(`Booking marked as ${newStatus}`)
-        } catch (err) {
-            console.error(err)
-            toast.error('Failed to update status')
+        // ✅ Update car availability
+        if (
+            booking?.carId &&
+            (newStatus === "completed" || newStatus === "cancelled")
+        ) {
+            await updateDoc(doc(db, "Carsdb", booking.carId), {
+                availability: "Available",
+            });
         }
+
+        // ✅ Update UI instantly
+        setBookings((prev) =>
+            prev.map((b) =>
+                b.id === id
+                    ? { ...b, status: newStatus }
+                    : b
+            )
+        );
+
+        toast.success(`Booking marked as ${newStatus}`);
+
+        // ✅ SEND EMAIL WHEN COMPLETED
+        if (newStatus === "completed") {
+
+            const response = await fetch("/api/send-email", {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                },
+
+                body: JSON.stringify({
+                    email: booking.customerEmail,
+                    customerName: booking.customerName,
+                    bookingId: booking.bookingId,
+                    carName: booking.carName,
+                    amount: booking.amount,
+                }),
+            });
+
+            const data = await response.json();
+
+            console.log(data);
+
+            toast.success("Email Sent Successfully ✅");
+        }
+
+    } catch (err) {
+        console.error(err);
+        toast.error("Failed to update status");
     }
+};
 
     const filtered = bookings
         .filter((b) => activeTab === 'all' || b.status === activeTab)
@@ -195,10 +239,10 @@ export default function ManageBookings() {
                                     <td className="px-5 py-4 flex justify-center gap-3">
                                         <Eye size={18} className="cursor-pointer text-gray-500 hover:text-blue-600" />
                                         {booking.status === 'confirmed' && (
-                                            <CheckCircle size={18} onClick={() => updateStatus(booking.id, 'completed')} className="cursor-pointer text-gray-400 hover:text-green-600" />
+                                            <CheckCircle size={18} onClick={() => updateStatus(booking.id, 'completed',booking)} className="cursor-pointer text-gray-400 hover:text-green-600" />
                                         )}
                                         {(booking.status === 'confirmed') && (
-                                            <XCircle size={18} onClick={() => updateStatus(booking.id, 'cancelled')} className="cursor-pointer text-gray-400 hover:text-red-500" />
+                                            <XCircle size={18} onClick={() => updateStatus(booking.id, 'cancelled',booking)} className="cursor-pointer text-gray-400 hover:text-red-500" />
                                         )}
                                     </td>
                                 </tr>

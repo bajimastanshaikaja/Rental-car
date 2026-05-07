@@ -8,7 +8,11 @@ import { CartesianGrid, Line, LineChart, XAxis, PieChart, Pie, LabelList, Cell }
 
 import { collection, getDocs } from "firebase/firestore"; 
 import { db } from "@/DB/FirebaseConfig";
+
 export const Dashboard = () => {
+
+  const [bookings, setBookings] = useState([]);
+
   const chartData = [
     { month: "January", desktop: 186 },
     { month: "February", desktop: 305 },
@@ -17,54 +21,51 @@ export const Dashboard = () => {
     { month: "May", desktop: 209 },
     { month: "June", desktop: 214 },
   ];
-const [bookings, setBookings] = useState([]);
+
   const chartConfig = { desktop: { label: "Desktop", color: "var(--chart-1)" } };
 
   const pieData = [
-    { browser: "SUV",  visitors: 275, fill: "#3b82f6" },
-    { browser: "Compact",  visitors: 200, fill: "#22c55e" },
-    { browser: "Sedan", visitors: 187, fill: "#f97316" },
-    { browser: "EV",    visitors: 173, fill: "#06b6d4" },
-    { browser: "Sports",   visitors: 90,  fill: "#a855f7" },
+    { browser: "SUV", visitors: 275 },
+    { browser: "Compact", visitors: 200 },
+    { browser: "Sedan", visitors: 187 },
+    { browser: "EV", visitors: 173 },
+    { browser: "Sports", visitors: 90 },
   ];
-  {/* ✅ CALCULATIONS (add just above return OR before JSX) */}
-const totalFleet = bookings.length;
 
-// consider active bookings (adjust status if needed)
-const rentedOut = bookings.filter(
-  (b) => b.status === "Booked" || b.status === "Confirmed"
-).length;
+  const COLORS = ["#C87740", "#00A19B", "#8B004A", "#6BBF59", "#58C5FE"];
 
-const available = totalFleet - rentedOut;
-  const STAT_CARDS = [
-    { icon: <IndianRupee />, bg: "bg-blue-100",   label: "Total Revenue",  value: "₹1,00,000", trend: "12.5%" },
-    { icon: <CalendarDays />, bg: "bg-green-100", label: "Total Bookings", value: "100",        trend: "12.5%" },
-    { icon: <Car />,          bg: "bg-cyan-100",  label: "Active Cars",    value: "10" },
-    { icon: <Users />,        bg: "bg-orange-100",label: "Total Users",    value: "20" },
-  ];
+  // 🔥 FETCH BOOKINGS
   useEffect(() => {
-  const fetchBookings = async () => {
-    try {
-      const snapshot = await getDocs(collection(db, "Bookings")); 
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setBookings(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    const fetchBookings = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "Bookings"));
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setBookings(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchBookings();
+  }, []);
 
-  fetchBookings();
-}, []);
-  const COLORS = [
-  "#C87740",
-  "#00A19B",
-  "#8B004A",
-  "#6BBF59",
-  "#58C5FE",
-];
+  // 🔥 CALCULATIONS
+  const totalFleet = bookings.length;
+
+  const rentedOut = bookings.filter(
+    (b) => b.status === "Booked" || b.status === "Confirmed"
+  ).length;
+
+  const available = totalFleet - rentedOut;
+
+  const STAT_CARDS = [
+    { icon: <IndianRupee />, bg: "bg-blue-100", label: "Total Revenue", value: "₹1,00,000", trend: "12.5%" },
+    { icon: <CalendarDays />, bg: "bg-green-100", label: "Total Bookings", value: "100", trend: "12.5%" },
+    { icon: <Car />, bg: "bg-cyan-100", label: "Active Cars", value: "10" },
+    { icon: <Users />, bg: "bg-orange-100", label: "Total Users", value: "20" },
+  ];
 
   const ChartLineDots = () => (
     <Card>
@@ -72,6 +73,7 @@ const available = totalFleet - rentedOut;
         <CardTitle>Bookings Over Time</CardTitle>
         <CardDescription>January – June 2024</CardDescription>
       </CardHeader>
+
       <CardContent>
         <ChartContainer config={chartConfig}>
           <LineChart data={chartData}>
@@ -82,6 +84,7 @@ const available = totalFleet - rentedOut;
           </LineChart>
         </ChartContainer>
       </CardContent>
+
       <CardFooter>
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <TrendingUp className="h-4 w-4 text-green-500" /> Trending up this month
@@ -90,8 +93,7 @@ const available = totalFleet - rentedOut;
     </Card>
   );
 
-  const ChartPie = () => {
-  return (
+  const ChartPie = () => (
     <Card>
       <CardHeader>
         <CardTitle>Bookings by Car Type</CardTitle>
@@ -104,16 +106,11 @@ const available = totalFleet - rentedOut;
             <ChartTooltip content={<ChartTooltipContent />} />
 
             <Pie data={pieData} dataKey="visitors" nameKey="browser">
-  
-  {pieData.map((entry, index) => (
-    <Cell 
-      key={`cell-${index}`} 
-      fill={COLORS[index % COLORS.length]} 
-    />
-  ))}
-
-  <LabelList dataKey="browser" fill="#ffffff" />
-</Pie>
+              {pieData.map((entry, index) => (
+                <Cell key={index} fill={COLORS[index % COLORS.length]} />
+              ))}
+              <LabelList dataKey="browser" fill="#ffffff" />
+            </Pie>
           </PieChart>
         </ChartContainer>
       </CardContent>
@@ -125,7 +122,7 @@ const available = totalFleet - rentedOut;
       </CardFooter>
     </Card>
   );
-};
+
   return (
     <div className="bg-gray-100 min-h-screen p-4 md:p-6">
 
@@ -137,7 +134,7 @@ const available = totalFleet - rentedOut;
         </p>
       </div>
 
-      {/* Stat Cards — 1 col mobile → 2 col tablet → 4 col desktop */}
+      {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {STAT_CARDS.map((card) => (
           <div key={card.label} className="bg-white rounded-xl p-5 shadow-sm">
@@ -158,97 +155,91 @@ const available = totalFleet - rentedOut;
         ))}
       </div>
 
-      {/* Charts — 1 col mobile → 2 col desktop */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 h-130">
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <ChartLineDots />
         <ChartPie />
       </div>
-      <div className="flex">
-  <div className="bg-white w-230 mt-3 rounded-lg shadow-sm overflow-x-auto h-60">
 
-    <h2 className="font-bold p-3">Recent Bookings</h2>
+      {/* Table + Fleet */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
 
-    <table className="w-full text-left text-sm border-collapse rounded-2xl">
+        {/* Table */}
+        <div className="bg-white rounded-lg shadow-sm overflow-x-auto lg:col-span-2">
 
-      <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs uppercase tracking-wide mt-6">
-        <tr>
-          <th className="px-5 py-3">Booking Id</th>
-          <th className="px-5 py-3">Car</th>
-          <th className="px-5 py-3">Dates</th>
-          <th className="px-5 py-3">Amount</th>
-          <th className="px-5 py-3">Status</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-gray-100">
-        {bookings.length === 0 ? (
-          <tr>
-            <td colSpan="5" className="text-center py-4 text-gray-400">
-              No bookings found
-            </td>
-          </tr>
-        ) : (
-          bookings.map((booking) => (
-            <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
+          <h2 className="font-bold p-3">Recent Bookings</h2>
 
-              <td className="px-5 py-3 text-gray-700">
-                {booking.bookingId}
-              </td>
+          <table className="w-full text-left text-sm min-w-[600px]">
 
-              <td className="px-5 py-3 text-gray-800">
-                {booking.carName}
-              </td>
+            <thead className="bg-gray-50 border-b text-gray-500 text-xs uppercase">
+              <tr>
+                <th className="px-5 py-3">Booking Id</th>
+                <th className="px-5 py-3">Car</th>
+                <th className="px-5 py-3">Dates</th>
+                <th className="px-5 py-3">Amount</th>
+                <th className="px-5 py-3">Status</th>
+              </tr>
+            </thead>
 
-              <td className="px-5 py-3 text-gray-600">
-                {booking.pickupDate}
-              </td>
+            <tbody className="divide-y">
+              {bookings.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="text-center py-4 text-gray-400">
+                    No bookings found
+                  </td>
+                </tr>
+              ) : (
+                bookings.map((booking) => (
+                  <tr key={booking.id} className="hover:bg-gray-50">
 
-              <td className="px-5 py-3 text-gray-800">
-                {booking.amount}
-              </td>
+                    <td className="px-5 py-3">{booking.bookingId}</td>
+                    <td className="px-5 py-3">{booking.carName}</td>
+                    <td className="px-5 py-3">{booking.pickupDate}</td>
+                    <td className="px-5 py-3">{booking.amount}</td>
+                    <td className="px-5 py-3">{booking.status}</td>
 
-              <td className="px-5 py-3">
-                {booking.status}
-              </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
 
-            </tr>
-          ))
-        )}
-      </tbody>
+          </table>
+        </div>
 
-    </table>
-  </div>
-  <div className="bg-white ml-15 mt-4 w-80 h-90 rounded-xl shadow-sm p-4">
-  <h1 className="font-bold text-lg mb-4">Fleet Status</h1>
+        {/* Fleet Status */}
+        <div className="bg-white rounded-xl shadow-sm p-4 h-fit self-start">
+  <h1 className="font-bold text-lg mb-3">Fleet Status</h1>
 
-  {/* Available */}
-  <div className="flex items-center justify-between bg-green-100 p-3 rounded-xl mb-3 mt-4">
-    <div>
-      <p className="text-gray-600 text-sm">Available</p>
-      <h2 className="text-xl font-bold text-green-600">{available}</h2>
+  <div className="space-y-3">
+
+    <div className="flex justify-between items-center bg-green-100 p-3 rounded-xl">
+      <div>
+        <p className="text-sm text-gray-600">Available</p>
+        <h2 className="text-lg font-bold text-green-600">{available}</h2>
+      </div>
+      <Car className="text-green-600" />
     </div>
-    <Car className="text-green-600" />
-  </div>
 
-  {/* Rented */}
-  <div className="flex items-center justify-between bg-red-100 p-3 rounded-xl mb-3">
-    <div>
-      <p className="text-gray-600 text-sm">Rented Out</p>
-      <h2 className="text-xl font-bold text-red-600">{rentedOut}</h2>
+    <div className="flex justify-between items-center bg-red-100 p-3 rounded-xl">
+      <div>
+        <p className="text-sm text-gray-600">Rented Out</p>
+        <h2 className="text-lg font-bold text-red-600">{rentedOut}</h2>
+      </div>
+      <Car className="text-red-600" />
     </div>
-    <Car className="text-red-600" />
-  </div>
 
-  {/* Total */}
-  <div className="flex items-center justify-between bg-blue-100 p-3 rounded-xl">
-    <div>
-      <p className="text-gray-600 text-sm">Total Fleet</p>
-      <h2 className="text-xl font-bold text-blue-600">{totalFleet}</h2>
+    <div className="flex justify-between items-center bg-blue-100 p-3 rounded-xl">
+      <div>
+        <p className="text-sm text-gray-600">Total Fleet</p>
+        <h2 className="text-lg font-bold text-blue-600">{totalFleet}</h2>
+      </div>
+      <Car className="text-blue-600" />
     </div>
-    <Car className="text-blue-600" />
+
   </div>
 </div>
-</div>
 
+      </div>
     </div>
   );
 };
