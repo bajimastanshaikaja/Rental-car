@@ -76,6 +76,12 @@ export default function ManageBookings() {
     const updateStatus = async (id, newStatus) => {
         try {
             await updateDoc(doc(db, 'Bookings', id), { status: newStatus })
+
+            const booking = bookings.find(b => b.id === id)
+            if (booking?.carId && (newStatus === 'completed' || newStatus === 'cancelled')) {
+                await updateDoc(doc(db, 'Carsdb', booking.carId), { availability: 'Available' })
+            }
+
             setBookings((prev) => prev.map((b) => b.id === id ? { ...b, status: newStatus } : b))
             toast.success(`Booking marked as ${newStatus}`)
         } catch (err) {
