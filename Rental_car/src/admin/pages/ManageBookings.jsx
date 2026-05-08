@@ -102,30 +102,33 @@ export default function ManageBookings() {
 
         toast.success(`Booking marked as ${newStatus}`);
 
-        // ✅ SEND EMAIL WHEN COMPLETED
-        if (newStatus === "completed") {
-
-            const response = await fetch("/api/send-email", {
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json",
-                },
-
-                body: JSON.stringify({
-                    email: booking.customerEmail,
-                    customerName: booking.customerName,
-                    bookingId: booking.bookingId,
-                    carName: booking.carName,
-                    amount: booking.amount,
-                }),
-            });
-
-            const data = await response.json();
-
-            console.log(data);
-
-            toast.success("Email Sent Successfully ✅");
+        // ✅ SEND EMAIL WHEN COMPLETED via Resend serverless function
+        if (newStatus === "completed" && booking?.customerEmail) {
+            try {
+                const res = await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email:        booking.customerEmail,
+                        customerName: booking.customerName,
+                        bookingId:    booking.bookingId,
+                        carName:      booking.carName,
+                        carBrand:     booking.carBrand  || '',
+                        carType:      booking.carType   || '',
+                        pickupDate:   booking.pickupDate || '—',
+                        returnDate:   booking.returnDate || '—',
+                        amount:       booking.amount,
+                    }),
+                })
+                if (res.ok) {
+                    toast.success("Completion email sent ✅")
+                } else {
+                    const err = await res.json()
+                    console.error('Email error:', err)
+                }
+            } catch (mailErr) {
+                console.error("Email send failed:", mailErr)
+            }
         }
 
     } catch (err) {
