@@ -120,14 +120,16 @@ export default function ManageBookings() {
                         amount:       booking.amount,
                     }),
                 })
+                const data = await res.json()
                 if (res.ok) {
                     toast.success("Completion email sent ✅")
                 } else {
-                    const err = await res.json()
-                    console.error('Email error:', err)
+                    console.error('Email API error:', data)
+                    toast.error(`Email failed: ${data?.error || 'Unknown error'}`)
                 }
             } catch (mailErr) {
                 console.error("Email send failed:", mailErr)
+                toast.error("Email could not be sent — check console")
             }
         }
 
