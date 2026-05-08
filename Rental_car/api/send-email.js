@@ -129,7 +129,7 @@ export default async function handler(req, res) {
         <tr>
           <td style="padding:0 40px 32px;text-align:center;">
             <p style="margin:0 0 16px;color:#6b7280;font-size:14px;">How was your experience? Your feedback helps us improve.</p>
-            <a href="${process.env.APP_URL || 'https://rentx.vercel.app'}/mybookings"
+            <a href="${process.env.APP_URL || 'https://rental-car-git-react-bajimastanshaikajas-projects.vercel.app'}/mybookings"
               style="display:inline-block;background:#1d4ed8;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:10px;font-size:15px;font-weight:600;">
               &#11088; Rate Your Ride
             </a>
