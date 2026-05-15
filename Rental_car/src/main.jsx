@@ -5,7 +5,7 @@ import { RouterProvider } from "react-router-dom";
 import "./index.css";
 import { router } from "./routes/Routes";
 
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { db, auth } from "./DB/FirebaseConfig";
 
@@ -22,6 +22,7 @@ const AuthProvider = ({ children }) => {
     return localStorage.getItem("userRole") || null;
   });
   const [authLoading, setAuthLoading] = useState(true);
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
 
   useEffect(() => {
     // Check for admin session in localStorage first
@@ -79,7 +80,7 @@ const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, role, authLoading, logout, loginAsAdmin }}>
+    <AuthContext.Provider value={{ currentUser, role, authLoading, logout, loginAsAdmin, loginDialogOpen, setLoginDialogOpen }}>
       {children}
     </AuthContext.Provider>
   );
@@ -89,25 +90,18 @@ const AuthProvider = ({ children }) => {
 const CarProvider = ({ children }) => {
   const [cars, setCars] = useState([]);
 
-  const fetchCars = async () => {
-    try {
-      const carsCollection = await getDocs(collection(db, "Carsdb"));
-      const carcollect = carsCollection.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setCars(carcollect);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
-    fetchCars();
+    // Real-time listener — rating, ratingCount, availability update instantly
+    const unsub = onSnapshot(collection(db, "Carsdb"), (snap) => {
+      setCars(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    }, (err) => {
+      console.error("Cars listener error:", err);
+    });
+    return () => unsub();
   }, []);
 
   return (
-    <CarContext.Provider value={{ cars, setCars, fetchCars }}>
+    <CarContext.Provider value={{ cars, setCars }}>
       {children}
     </CarContext.Provider>
   );

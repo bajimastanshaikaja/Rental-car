@@ -13,8 +13,7 @@ import { db } from "@/DB/FirebaseConfig";
 import { CarContext } from "@/main";
 
 const UpdateCar = ({ open, setOpen, car }) => {
-  const {cars,fetchCars } = useContext(CarContext);
-  console.log(cars);
+  const { cars } = useContext(CarContext);
 
   const [formData, setFormData] = useState({
     carName: "",
@@ -58,8 +57,6 @@ const UpdateCar = ({ open, setOpen, car }) => {
       await updateDoc(docRef, formData);
 
       alert("Car updated successfully ✅");
-
-      fetchCars();
       setOpen(false);
     } catch (error) {
       console.error("Update error:", error);

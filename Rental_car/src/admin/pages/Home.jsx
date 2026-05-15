@@ -71,7 +71,7 @@ const TESTIMONIALS = [
 // ── Component ─────────────────────────────────────────────
 
 function Home() {
-    const { currentUser, role } = useContext(AuthContext)
+    const { currentUser, role, setLoginDialogOpen } = useContext(AuthContext)
     const navigate = useNavigate()
 
     const handleCTA = () => {
@@ -100,22 +100,22 @@ function Home() {
 
                 <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 w-full">
                     {/* Left — text only, full width on bg image layout */}
-                    <div className="flex flex-col gap-6 max-w-2xl">
+                    <div className="flex flex-col gap-6 max-w-2xl animate-fade-in-up">
                         <span className="inline-flex items-center gap-2 bg-blue-600/20 text-blue-400 text-sm font-semibold px-4 py-1.5 rounded-full w-fit border border-blue-500/30">
                             <MapPin size={14} /> Available across Hyderabad
                         </span>
 
-                        <h1 className="text-5xl lg:text-6xl font-extrabold text-white leading-tight">
+                        <h1 className="text-5xl lg:text-6xl font-extrabold text-white leading-tight animate-fade-in-up delay-200">
                             Drive Your Way,<br />
                             <span className="text-orange-400 italic">Any Time.</span>
                         </h1>
 
-                        <p className="text-gray-300 text-lg max-w-md leading-relaxed">
+                        <p className="text-gray-300 text-lg max-w-md leading-relaxed animate-fade-in-up delay-300">
                             Rent premium cars by the hour. No paperwork, no hassle —
                             just pick, book, and drive.
                         </p>
 
-                        <div className="flex flex-wrap gap-3 mt-2">
+                        <div className="flex flex-wrap gap-3 mt-2 animate-fade-in-up delay-400">
                             {currentUser ? (
                                 <button
                                     onClick={handleCTA}
@@ -126,18 +126,18 @@ function Home() {
                                 </button>
                             ) : (
                                 <>
-                                    <Link
-                                        to="/browsecars"
+                                    <button
+                                        onClick={() => setLoginDialogOpen(true)}
                                         className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-7 py-3 rounded-xl font-semibold text-base transition-colors"
                                     >
                                         Get Started <ArrowRight size={18} />
-                                    </Link>
-                                    <Link
-                                        to="/browsecars"
+                                    </button>
+                                    <button
+                                        onClick={() => setLoginDialogOpen(true)}
                                         className="flex items-center gap-2 border border-white/30 text-white hover:bg-white/10 px-7 py-3 rounded-xl font-semibold text-base transition-colors"
                                     >
                                         Browse Cars
-                                    </Link>
+                                    </button>
                                 </>
                             )}
                         </div>
@@ -157,7 +157,7 @@ function Home() {
 
             {/* ── Stats Bar ────────────────────────────────── */}
             <section className="bg-blue-600 py-10">
-                <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center animate-fade-in">
                     {STATS.map((s) => (
                         <div key={s.label}>
                             <p className="text-3xl font-extrabold text-white">{s.value}</p>
@@ -177,7 +177,7 @@ function Home() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {FEATURES.map((f) => (
-                            <div key={f.title} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3">
+                            <div key={f.title} className="bg-white rounded-2xl p-6 shadow-sm flex flex-col gap-3 card-hover animate-scale-in">
                                 <div className="bg-blue-50 w-14 h-14 rounded-xl flex items-center justify-center">
                                     {f.icon}
                                 </div>
@@ -202,7 +202,7 @@ function Home() {
                         <div className="hidden md:block absolute top-10 left-[16%] right-[16%] h-0.5 bg-blue-100 z-0" />
 
                         {STEPS.map((s, i) => (
-                            <div key={s.step} className="relative z-10 flex flex-col items-center text-center gap-4">
+                            <div key={s.step} className="relative z-10 flex flex-col items-center text-center gap-4 animate-fade-in-up">
                                 <div className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-extrabold shadow-lg">
                                     {s.step}
                                 </div>
@@ -224,7 +224,7 @@ function Home() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {TESTIMONIALS.map((t) => (
-                            <div key={t.name} className="bg-white rounded-2xl p-6 shadow-sm flex flex-col gap-4">
+                            <div key={t.name} className="bg-white rounded-2xl p-6 shadow-sm flex flex-col gap-4 card-hover animate-scale-in">
                                 {/* Stars */}
                                 <div className="flex gap-1">
                                     {Array.from({ length: 5 }).map((_, i) => (
@@ -258,12 +258,12 @@ function Home() {
                     <p className="text-blue-100 text-lg">
                         Join thousands of drivers who trust RentX for their daily rides.
                     </p>
-                    <Link
-                        to="/browsecars"
+                    <button
+                        onClick={() => !currentUser ? setLoginDialogOpen(true) : navigate('/browsecars')}
                         className="flex items-center gap-2 bg-white text-blue-700 font-bold px-8 py-3.5 rounded-xl hover:bg-blue-50 transition-colors text-base"
                     >
                         Browse Cars Now <ChevronRight size={18} />
-                    </Link>
+                    </button>
                 </div>
             </section>
 

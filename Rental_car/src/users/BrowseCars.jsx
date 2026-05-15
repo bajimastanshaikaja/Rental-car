@@ -7,7 +7,7 @@ function BrowseCars() {
     const [searchCars, setSearchCars] = useState('')
 
     // Filter state
-    const [maxPrice, setMaxPrice] = useState('')
+    const [maxPrice, setMaxPrice] = useState(50000)
     const [minRating, setMinRating] = useState(0)
     const [showFilters, setShowFilters] = useState(false)
 
@@ -16,7 +16,7 @@ function BrowseCars() {
             car.carName?.toLowerCase().includes(searchCars.toLowerCase()) ||
             car.brand?.toLowerCase().includes(searchCars.toLowerCase())
 
-        const matchesPrice = maxPrice === '' || Number(car.price) <= Number(maxPrice)
+        const matchesPrice = Number(car.price) <= Number(maxPrice)
 
         const matchesRating = Number(car.rating ?? 0) >= minRating
 
@@ -24,12 +24,12 @@ function BrowseCars() {
     })
 
     const clearFilters = () => {
-        setMaxPrice('')
+        setMaxPrice(50000)
         setMinRating(0)
         setSearchCars('')
     }
 
-    const hasActiveFilters = maxPrice !== '' || minRating > 0 || searchCars !== ''
+    const hasActiveFilters = maxPrice < 50000 || minRating > 0 || searchCars !== ''
 
     return (
         <div className='min-h-screen bg-gray-50 py-8 px-5'>
@@ -82,21 +82,21 @@ function BrowseCars() {
                         <label className='text-sm font-semibold text-gray-700'>
                             Max Price per Hour
                             {maxPrice && (
-                                <span className='ml-2 text-blue-600 font-bold'>${maxPrice}</span>
+                                <span className='ml-2 text-blue-600 font-bold'>₹{maxPrice}</span>
                             )}
                         </label>
                         <input
                             type='range'
                             min={0}
-                            max={500}
-                            step={10}
-                            value={maxPrice === '' ? 500 : maxPrice}
+                            max={50000}
+                            step={500}
+                            value={maxPrice}
                             onChange={(e) => setMaxPrice(e.target.value)}
                             className='accent-blue-600 w-full'
                         />
                         <div className='flex justify-between text-xs text-gray-400'>
-                            <span>$0</span>
-                            <span>$500</span>
+                            <span>₹0</span>
+                            <span>₹50,000</span>
                         </div>
                     </div>
 

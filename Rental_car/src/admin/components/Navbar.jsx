@@ -8,11 +8,20 @@ import Login from "../pages/Login";
 import { toast } from "sonner";
 
 function Navbar() {
-  const { currentUser, role, logout } = useContext(AuthContext);
+  const { currentUser, role, logout, loginDialogOpen, setLoginDialogOpen } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
 
   const [open, setOpen] = useState(false);
+
+  // Sync with context-driven open state (allows external components to open login)
+  React.useEffect(() => {
+    if (loginDialogOpen) {
+      setAuthMode("login");
+      setOpen(true);
+      setLoginDialogOpen(false);
+    }
+  }, [loginDialogOpen]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [authMode, setAuthMode] = useState("login");
 
